@@ -9,6 +9,7 @@
 from pyspark import SparkContext
 import re #python regular expressions.
 from operator import add
+from operator import itemgetter #for sorting by an unnamed key
 
 
 def main(args):
@@ -20,41 +21,38 @@ def main(args):
 	theText = sc.textFile(myFile)
 	allWords = theText.flatMap(lambda line: line.split(" "))
 	
-	#What I need to do now is create a new rdd containing only words that start with capital letters. ^[A-Z]
+	#capMapper() removes words that are not capitalized.
 	capWords = allWords.flatMap(capMapper)
-	
 
-	# count the occurrence of each word
+	#Assign each word the value of 1.
 	wordMap = capWords.map(lambda word: (word, 1))
 	
-	# ~ wordCounts = wordMap.reduceByKey(lambda a,b:a +b)
+	#Reduce the word list by adding the separate occurrences. The count of each word remains.
 	wordCounts = wordMap.reduceByKey(add).collect()  #collect turns it into a list.
 	# ~ wordCounts = wordMap.reduceByKey(add)
 	
-	print(sorted(wordCounts))
+	# ~ print(sorted(wordCounts))
 	
 	# save the counts to output
 	# ~ wordCounts.saveAsTextFile("out")
+	
+	for cWord in sorted(wordCounts, key=itemgetter(1), reverse=True):
+		firstItemGet = itemgetter(0)
+		secondItemGet = itemgetter(1)
+		if secondItemGet(cWord) > 5:
+			print( str(firstItemGet(cWord)) + "\t" + str(secondItemGet(cWord)) )
 
 	
-	# reg exp I want is ^[A-Z]
-	# "first letter of string is A-Z. It's already split by words now so will work
-	
-	# ~ print("Lines with a: %i, lines with b: %i" % (numAs, numBs))
-	
-	if isCapWord("Bear"):
-		print("cap")
-	else:
-		print("nocap")
-		
 	return 0
 
+#For use in flatMap(). Returns the word only if Capitalized. Else nothing.
 def capMapper(myWord):
 	if isCapWord(myWord):
 		return [myWord]
 	else:
 		return []
 
+#Returns true if the input word string is capitalized in the first character.
 def isCapWord(myWord):
 	myRegex = re.compile("^[A-Z]")
 	if myRegex.match(myWord):
