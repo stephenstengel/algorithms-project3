@@ -20,6 +20,7 @@ from operator import add
 from operator import itemgetter #for sorting by an unnamed key
 import time #for timing the reductions.
 import os #removing created files
+import math #for math.inf
 
 
 def main(args):
@@ -43,11 +44,12 @@ def main(args):
 	isPrintLists = True
 	isPrintTimes = True
 	
-	outputTimes = []
+	# ~ outputTimes = []
 	
 	print("Starting timing tests...")
 	for i in range(0, len(fNameArray) ):
-		outputTimes.append( runTest( fNameArray[i], sc, isPrintLists, isPrintTimes ) )
+		# ~ outputTimes.append( runTest( fNameArray[i], sc, isPrintLists, isPrintTimes ) )
+		runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
 	
 	print("Time tests done!")
 	
@@ -60,27 +62,33 @@ def main(args):
 #Prints the final word list if isPrintList is True. Prints time if isPrintTime is True.
 #Returns the time for execution on each file.
 def runTest(fileName, sc, isPrintList, isPrintTime):
-	outlist = capWordCounter(fileName, sc)
+	#I run the test five times and take the min time as the output.
+	#This makes sense because the input is not random, and the min time will be without other programs messing it up.
 	
-	# ~ print("Total time for " + fileName + ":\t" + str( outsideEnd - outsideStart ))###
+	mintime = math.inf
+	outlist = None
+	for i in range(0,5):
+		thisList, thisTime = capWordCounter(fileName, sc)
+		# ~ print("test " + str(i) + " of\t" + fileName + "time:\t" + str(thisTime))
+		if thisTime < mintime:
+			outlist = thisList
+			mintime = thisTime
 	
 	if isPrintList or isPrintTime:
 		if isPrintTime:
-			pass
-			# ~ print(fileName + "\tload: " + str(timeLoad) + "\tmap: " + str(timeMap) + "\treduce: " + str(timeReduction))
+			print("Time for " + fileName + "\t: " + str(mintime))
 		if isPrintList:
 			print("List for " + fileName + "...")
 			printOutput(outlist)
 
-	return 0
+	return mintime
 
 
 #Makes a count of the number of each capitalized word in an input text.
-#Returns a list, map time, reduction time. Params: Input file, spark context.
+#Returns a list and execution time. Params: Input file, spark context.
 def capWordCounter(myFile, sc):
-	# ~ allStart = time.time()####
+	allStart = time.time()
 	theText = sc.textFile(myFile)
-	# ~ theText = sc.textFile(myFile).cache()
 	
 	allWords = theText.flatMap(lambda line: line.split(" "))
 	
@@ -95,7 +103,9 @@ def capWordCounter(myFile, sc):
 	
 	wordCountsList = wordCounts.collect()  #collect turns it into a list.
 	
-	return wordCountsList
+	allEnd = time.time()
+	
+	return wordCountsList, (allEnd - allStart)
 
 
 #For use in flatMap(). Returns the word only if Capitalized. Else nothing.
