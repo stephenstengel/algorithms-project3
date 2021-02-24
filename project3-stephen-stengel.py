@@ -23,8 +23,16 @@ import os #removing created files
 import math #for math.inf
 
 
+GLOBAL_NUM_PRINT_LINES = 10
+
+
 def main(args):
 	sc = SparkContext()
+	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+	
 	
 	file1 = "WarIsARacket_djvu.txt"
 	file2 = "pride-and-prejudice.txt"
@@ -79,7 +87,7 @@ def runTest(fileName, sc, isPrintList, isPrintTime):
 			print("Time for " + fileName + "\t: " + str(mintime))
 		if isPrintList:
 			print("List for " + fileName + "...")
-			printOutput(outlist)
+			printOutput(outlist, GLOBAL_NUM_PRINT_LINES)
 
 	return mintime
 
@@ -90,10 +98,13 @@ def capWordCounter(myFile, sc):
 	allStart = time.time()
 	theText = sc.textFile(myFile)
 	
-	allWords = theText.flatMap(lambda line: line.split(" "))
+	#NMy old method for getting the words in two steps.
+	# ~ allWords = theText.flatMap(lambda line: line.split(" "))
+	# ~ #remove words that are not capitalized.
+	# ~ capWords = allWords.flatMap(capMapper)
 	
-	#remove words that are not capitalized.
-	capWords = allWords.flatMap(capMapper)
+	#This method finds all words that match an expression. That expression looks for capitalized words. It's faster and more accurate.
+	capWords = theText.flatMap( lambda line: re.findall( r"\b[A-Z][a-zA-Z]*\b", line ) )
 
 	#Assign each word the value of 1.
 	wordMap = capWords.map(lambda word: (word, 1))
@@ -124,10 +135,10 @@ def isCapWord(myWord):
 		return False
 
 #Prints the output of reduction. Max ten lines.
-def printOutput(wordCountsList):
+def printOutput(wordCountsList, maxNumLines):
 	count = 1
 	for cWord in sorted(wordCountsList, key=itemgetter(1), reverse=True):
-		if count > 10:
+		if count > maxNumLines:
 			break
 		firstItemGet = itemgetter(0)
 		secondItemGet = itemgetter(1)
