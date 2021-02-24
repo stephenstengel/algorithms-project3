@@ -57,36 +57,31 @@ def main(args):
 
 
 #Runs a test of map and reduce on the input file.
-#Prints the final word list if isPrintList is True. Prints times if isPrintTimes is True.
-#Returns the time for mapping and time for reduction.
+#Prints the final word list if isPrintList is True. Prints time if isPrintTime is True.
+#Returns the time for execution on each file.
 def runTest(fileName, sc, isPrintList, isPrintTime):
-	outsideStart = time.time()###
-	outlist, timeLoad, timeMap, timeReduction = capWordCounter(fileName, sc)
-	outsideEnd = time.time()###
+	outlist = capWordCounter(fileName, sc)
 	
-	print("Total time for " + fileName + ":\t" + str( outsideEnd - outsideStart ))###
+	# ~ print("Total time for " + fileName + ":\t" + str( outsideEnd - outsideStart ))###
 	
 	if isPrintList or isPrintTime:
 		if isPrintTime:
-			print(fileName + "\tload: " + str(timeLoad) + "\tmap: " + str(timeMap) + "\treduce: " + str(timeReduction))
+			pass
+			# ~ print(fileName + "\tload: " + str(timeLoad) + "\tmap: " + str(timeMap) + "\treduce: " + str(timeReduction))
 		if isPrintList:
 			print("List for " + fileName + "...")
 			printOutput(outlist)
 
-	return timeLoad, timeMap, timeReduction
+	return 0
 
 
 #Makes a count of the number of each capitalized word in an input text.
 #Returns a list, map time, reduction time. Params: Input file, spark context.
 def capWordCounter(myFile, sc):
-	print("Loading " + str(myFile) + "...")
-	loadStart = time.time()
+	# ~ allStart = time.time()####
 	theText = sc.textFile(myFile)
-	loadEnd = time.time()
-	print("Done loading " + str(myFile) + "!")
+	# ~ theText = sc.textFile(myFile).cache()
 	
-	#start map timer
-	startMap = time.time()
 	allWords = theText.flatMap(lambda line: line.split(" "))
 	
 	#remove words that are not capitalized.
@@ -94,20 +89,13 @@ def capWordCounter(myFile, sc):
 
 	#Assign each word the value of 1.
 	wordMap = capWords.map(lambda word: (word, 1))
-	#end map timer
-	endMap = time.time()
 	
 	#Reduce the word list by summing the separate occurrences.
-	startReduce = time.time()
 	wordCounts = wordMap.reduceByKey(add)
-	endReduce = time.time()
 	
-	colStart = time.time()############
 	wordCountsList = wordCounts.collect()  #collect turns it into a list.
-	colEnd = time.time()#############
-	print("Time to collect list:\t" + str( colEnd - colStart ))#############
 	
-	return wordCountsList, (loadEnd - loadStart), (endMap - startMap), (endReduce - startReduce)
+	return wordCountsList
 
 
 #For use in flatMap(). Returns the word only if Capitalized. Else nothing.
