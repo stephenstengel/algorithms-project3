@@ -11,7 +11,7 @@
 %~ \usepackage{cite}
 
 
-\title{Project 2}
+\title{Project 3}
 \author{Stephen Stengel\\Central Washington University\\stephen.stengel@cwu.edu}
 
 
@@ -35,35 +35,71 @@
 %~ \twocolumn %%%%%%%%%%%%
 
 \section{Introduction}
-In this report, I analyze a test of the runtime of the map and reduce functions implemented in apache spark; specifically pyspark.
+In this report, I analyze a test of the runtime of the map and reduce functions implemented in apache spark; specifically pyspark. My program finds the count of each individual word used in a text using mapping and reduction.
 
 
 \subsection{Method}
-To test the runtime of map and reduce I made a python script that takes some text files as input. One of the text files is a book which is then copied ten times into one file, resulting in a new text file that is ten times larger. A set of these files of sizes times 10, time 100, and times 1000 are made. These created files are deleted before the script finishes.
+To test the runtime of map and reduce I made a python script that takes some text files as input. One of the text files is a book which is then copied ten times into one file, resulting in a new text file that is ten times larger. A set of these files of sizes times 10, times 100, and times 1000 are made. These created files are deleted before the script finishes.
 
-Each file is taken as input. A regular expression is then used to filter the individual words of the text into a map. Then, the map is reduced by finding the count of each individual word. This resulting map is then converted into a list that can be printed.
+Each file is taken as input. A regular expression is then used to filter the individual words of the text into a map. Then, the map is reduced by finding the count of each individual word. This resulting map is then converted into a list that can be printed. At the end of the script, we have a list of words contained in the text with counts of the number of times that each word is used.
 
 The pyspark implementation of Apache Spark is automatically multithreaded. When running the map/reduce portion of the script, multiple child processes are spawned to handle the computation simultaneously. This is possible because each word in the map can be considered separately and does not affect others.
 
 I learned that spark uses lazy execution to batch together computations. This makes it difficult to time the individual processes of mapping, and reduction; so for this project, I only recorded the overall runtime of the map/reduce on each input text.
 
+I ran the script on four different computers, each with different CPUs:
+\begin{itemize}
+\item  A laptop with an Intel dual core CPU
+\item Another laptop with an Intel dual core CPU, but with four virtual cores
+\item A raspberry pi 3 with a four core ARM CPU. Running without a GUI desktop to save RAM memory.
+\item A desktop computer with a four core Intel CPU, but with eight virtual cores.
+\end{itemize}
+
+\subsection{Note}
+Each input file was tested five times and the lowest runtime of those trials was recorded. This makes sense in this case because the inputs are not random, so any increase in runtime will be from competition for CPU time.
 
 \section{Data}
+The number of outputs for this project is fairly small, so I just put them into a spreadsheet manually instead of using a python graphing package.
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1.0\linewidth]{../chart-data.png}
+  \caption{Spreadsheet of the collected data. Each runtime is in seconds and the minimum of five trials.}
+  \label{fig:spread}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=1.0\linewidth]{../bar-chart.png}
+  \caption{Bar chart of the collected data with logarithmic Y scale.}
+  \label{fig:bar}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=1.0\linewidth]{../sample-word-count.png}
+  \caption{A sample output for one text file.}
+  \label{fig:sample}
+\end{figure}
 
 
 \section{Analysis}
+Of the four computers used in this test, the generally slowest is the raspberry pi 3, followed by the dual core laptop, then the four virtual core laptop. The fastest in general is the desktop computer. This ranking is true for this script as well.
+
+For each of the computers, especially the dual core computers, we see that the runtime of the script increases at least about linearly with the size of the input. However, for the computers with four real cores, we see that for the larger input sizes, the runtime increases less than linearly.
+
+For example the ratio of the runtimes for the raspberry pi 3 on the pride-1000 test vs the pride-100 test is about 6.76, which is a fair amount less than the expected 10. Similarly, for the desktop, the same ratio is 5.34. The ratio for the slowest laptop is 9.12, and the four virtual core laptop is about 9.09.
+
+We might have expected that the raspberry pi would be much further behind or have worse ratios, because it only has about 1GB of RAM. However, this did not seem to be a bottleneck-- we see better-than-linear improvement ratios for larger inputs with the raspberry pi. Meanwhile, the dual core laptops had more than sufficient memory during each test (as verified by using the htop process manager). None of the computers appeared to cache memory to disk during execution.
+
+The largest text file used was just under a gigabyte, allowing the raspberry pi to hold it all in memory if necessary; Although, judging from its memory usage during execution, I think that Spark must have only loaded four smaller chunks of the file into memory at a time, because the actively used memory was usually only around 400 to 500 MB. The remainder was inactive-unfreed memory.
 
 
 \section{Conclusion}
+Apache Spark is highly parallelizable and benefits greatly from having more CPU cores to work with while preforming map and reduce functions. More cores leads to sub-linear speedup as input increases linearly.
 
+Another area of interest would be connecting multiple computers to the same Apache Spark session. In Apache Spark, computers can be connected as workers to a master computer which transmits work to be done. This allows the master computer to use the other CPUs for parallelization. If transmission speeds are high enough and computations long enough, it could be a speedup to send portions of work to other computers on a fast network. I was unable to use this for this project because I used the pyspark implementation of Spark from the pip package manager. This lightweight version of spark is missing some background files used to easily connect computers together.
 
-%~ \begin{figure}[h]
-  %~ \centering
-  %~ \includegraphics[width=0.9\linewidth]{../pictures/rawscatterMEI.png}
-  %~ \caption{Scatter plot of MEI vs Year.}
-  %~ \label{fig:2MEI}
-%~ \end{figure}
 
 %~ \begin{equation}
 %~ \label{equation1}
@@ -79,7 +115,7 @@ I learned that spark uses lazy execution to batch together computations. This ma
 \clearpage
 %~ \onecolumn
 %~ \newpage
-\bibliography{references}
-\bibliographystyle{ieeetr}
+%~ \bibliography{references}
+%~ \bibliographystyle{ieeetr}
 
 \end{document}
