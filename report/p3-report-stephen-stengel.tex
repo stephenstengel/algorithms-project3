@@ -11,8 +11,6 @@
 %~ \usepackage{cite}
 
 
-
-
 \title{Project 2}
 \author{Stephen Stengel\\Central Washington University\\stephen.stengel@cwu.edu}
 
@@ -37,15 +35,35 @@
 %~ \twocolumn %%%%%%%%%%%%
 
 \section{Introduction}
-In this report I cover the data found about the ClimateData.csv dataset \cite{discovering_stats_r}
+In this report, I analyze a test of the runtime of the map and reduce functions implemented in apache spark; specifically pyspark.
 
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\linewidth]{../pictures/rawscatterMEI.png}
-  \caption{Scatter plot of MEI vs Year.}
-  \label{fig:2MEI}
-\end{figure}
+\subsection{Method}
+To test the runtime of map and reduce I made a python script that takes some text files as input. One of the text files is a book which is then copied ten times into one file, resulting in a new text file that is ten times larger. A set of these files of sizes times 10, time 100, and times 1000 are made. These created files are deleted before the script finishes.
+
+Each file is taken as input. A regular expression is then used to filter the individual words of the text into a map. Then, the map is reduced by finding the count of each individual word. This resulting map is then converted into a list that can be printed.
+
+The pyspark implementation of Apache Spark is automatically multithreaded. When running the map/reduce portion of the script, multiple child processes are spawned to handle the computation simultaneously. This is possible because each word in the map can be considered separately and does not affect others.
+
+I learned that spark uses lazy execution to batch together computations. This makes it difficult to time the individual processes of mapping, and reduction; so for this project, I only recorded the overall runtime of the map/reduce on each input text.
+
+
+\section{Data}
+
+
+
+\section{Analysis}
+
+
+\section{Conclusion}
+
+
+%~ \begin{figure}[h]
+  %~ \centering
+  %~ \includegraphics[width=0.9\linewidth]{../pictures/rawscatterMEI.png}
+  %~ \caption{Scatter plot of MEI vs Year.}
+  %~ \label{fig:2MEI}
+%~ \end{figure}
 
 %~ \begin{equation}
 %~ \label{equation1}
