@@ -45,9 +45,9 @@ def main(args):
 	print("Done generating texts!")
 	
 	#put filenames into array
-	# ~ fNameArray = [file1, file2, file3, file4, file5]
+	fNameArray = [file1, file2, file3, file4, file5]
 	# ~ fNameArray = [file1, file2, file3, file4]
-	fNameArray = [file1, file2, file3]
+	# ~ fNameArray = [file1, file2, file3]
 	
 	isPrintLists = True
 	isPrintTimes = True
