@@ -52,23 +52,21 @@ def main(args):
 	isPrintLists = True
 	isPrintTimes = True
 	
-	# ~ outputTimes = []
-	
 	print("Starting timing tests...")
 	for i in range(0, len(fNameArray) ):
-		# ~ outputTimes.append( runTest( fNameArray[i], sc, isPrintLists, isPrintTimes ) )
 		runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
-	
 	print("Time tests done!")
 	
+	print("Removing temporary files...")
 	os.system("rm " + str(file3) + " " + str(file4) + " " + str(file5) )
+	print("Done!")
 	
 	return 0
 
 
 #Runs a test of map and reduce on the input file.
 #Prints the final word list if isPrintList is True. Prints time if isPrintTime is True.
-#Returns the time for execution on each file.
+#Returns the min time for execution on the file.
 def runTest(fileName, sc, isPrintList, isPrintTime):
 	#I run the test five times and take the min time as the output.
 	#This makes sense because the input is not random, and the min time will be without other programs messing it up.
@@ -77,7 +75,6 @@ def runTest(fileName, sc, isPrintList, isPrintTime):
 	outlist = None
 	for i in range(0,5):
 		thisList, thisTime = capWordCounter(fileName, sc)
-		# ~ print("test " + str(i) + " of\t" + fileName + "time:\t" + str(thisTime))
 		if thisTime < mintime:
 			outlist = thisList
 			mintime = thisTime
@@ -120,19 +117,23 @@ def capWordCounter(myFile, sc):
 
 
 #For use in flatMap(). Returns the word only if Capitalized. Else nothing.
+#Unused.
 def capMapper(myWord):
 	if isCapWord(myWord):
 		return [myWord]
 	else:
 		return []
 
+
 #Returns true if the input word string is capitalized in the first character.
+#Unused.
 def isCapWord(myWord):
 	myRegex = re.compile("^[A-Z]")
 	if myRegex.match(myWord):
 		return True
 	else:
 		return False
+
 
 #Prints the output of reduction. Max ten lines.
 def printOutput(wordCountsList, maxNumLines):
@@ -144,6 +145,7 @@ def printOutput(wordCountsList, maxNumLines):
 		secondItemGet = itemgetter(1)
 		print( str(firstItemGet(cWord)) + "\t" + str(secondItemGet(cWord)) )
 		count += 1
+
 
 #Creates a file a multiple larger than input file by rewiting lines.
 #Returns the name of the file.
