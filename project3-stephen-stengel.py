@@ -15,6 +15,7 @@
 #See: https://stackoverflow.com/questions/36269179/how-to-time-a-transformation-in-spark-given-lazy-execution-style
 
 from pyspark import SparkContext
+from pyspark import SparkConf
 import re #python regular expressions.
 from operator import add
 from operator import itemgetter #for sorting by an unnamed key
@@ -27,6 +28,11 @@ GLOBAL_NUM_PRINT_LINES = 10
 
 
 def main(args):
+	#this can limit the number of threads to use...
+	# ~ conf = SparkConf()
+	# ~ conf.setMaster("local[3]")
+	# ~ sc = SparkContext(conf=conf)
+	
 	sc = SparkContext()
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
@@ -52,11 +58,22 @@ def main(args):
 	isPrintLists = True
 	isPrintTimes = True
 	
-	print("Starting timing tests...")
-	for i in range(0, len(fNameArray) ):
-		runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
-	print("Time tests done!")
+	# ~ print("Starting timing tests...")
+	# ~ for i in range(0, len(fNameArray) ):
+		# ~ runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
+	# ~ print("Time tests done!")
 	
+	
+	print("Starting cores tests...")
+	
+	print("Done!")
+	for i in range(1, 8):
+		sc.stop()
+		conf = SparkConf()
+		conf.setMaster("local[" + str(i) + "]")
+		sc = SparkContext(conf=conf)
+		print("Testing with " + str(i) + " thread...")
+		runTest( file5, sc, isPrintLists, isPrintTimes )
 	print("Removing temporary files...")
 	os.system("rm " + str(file3) + " " + str(file4) + " " + str(file5) )
 	print("Done!")
