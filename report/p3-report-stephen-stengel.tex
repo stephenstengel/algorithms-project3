@@ -55,6 +55,8 @@ I ran the script on four different computers, each with different CPUs:
 \item A desktop computer with a four core Intel CPU, but with eight virtual cores.
 \end{itemize}
 
+I also did a test on the effect of the number of processes used. See Figure \ref{fig:thread-yelena}
+
 \subsection{Note}
 Each input file was tested five times and the lowest runtime of those trials was recorded. This makes sense in this case because the inputs are not random, so any increase in runtime will be from competition for CPU time.
 
@@ -82,8 +84,17 @@ The number of outputs for this project is fairly small, so I just put them into 
   \label{fig:sample}
 \end{figure}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=1.0\linewidth]{../thread-plot-yelena.png}
+  \caption{Plot of the effect of number of threads. This plot was run on the desktop computer with eight virtual cores (two virtual threads per pyhsical core).}
+  \label{fig:thread-yelena}
+\end{figure}
+
 
 \section{Analysis}
+\subsection{Effect of Input Size}
+
 Of the four computers used in this test, the generally slowest is the raspberry pi 3, followed by the dual core laptop, then the four virtual core laptop. The fastest in general is the desktop computer. This ranking is true for this script as well.
 
 For each of the computers, especially the dual core computers, we see that the runtime of the script increases at least about linearly with the size of the input. However, for the computers with four real cores, we see that for the larger input sizes, the runtime increases less than linearly.
@@ -93,6 +104,11 @@ For example the ratio of the runtimes for the raspberry pi 3 on the pride-1000 t
 We might have expected that the raspberry pi would be much further behind or have worse ratios, because it only has about 1GB of RAM. However, this did not seem to be a bottleneck-- we see better-than-linear improvement ratios for larger inputs with the raspberry pi. Meanwhile, the dual core laptops had more than sufficient memory during each test (as verified by using the htop process manager). None of the computers appeared to cache memory to disk during execution.
 
 The largest text file used was just under a gigabyte, allowing the raspberry pi to hold it all in memory if necessary; Although, judging from its memory usage during execution, I think that Spark must have only loaded four smaller chunks of the file into memory at a time, because the actively used memory was usually only around 400 to 500 MB. The remainder was inactive-unfreed memory.
+
+\subsection{Effect of Threads}
+I also did a test on the effect of the size of the input file, see Figure \ref{fig:thread-yelena}. We see that as number of threads increases, the computation time goes down until we reach a point where number of threads is equal to the number of cores on the computer. This test was done with the pride-and-prejudice.txt file multiplied in size by 1000 on the desktop computer with eight virtual cores (two virtual cores per physical core). After the four thread point is reached, the decrease in runtime becomes negligible. I performed some tests that increased the number of threads past eight, and there was basically no difference in runtime past eight threads. I also tried to create a very large number of threads, 2000, but spark seems to limit the number of threads to $2 * $number of cores.
+
+This test was only performed on the desktop computer because it is fastest and I forgot to add this section until the due date of the project! The runtime for the raspberry pi, for example, would have been tremendous. (5 tests $*$ 8 thread tests $* 252$ seconds $*$ 4 (because the size test used four cores) = 40,320 seconds for the first test. The following three tests would come out to about 40,320 combined. The following four tests would be about 10,080 each. This would total to about 120,960 seconds or 33.6 hours!)
 
 
 \section{Conclusion}

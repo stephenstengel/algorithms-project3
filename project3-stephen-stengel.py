@@ -7,12 +7,8 @@
 #  Project3
 
 #Note
-#I discovered that spark executes transformations, mapping, and
-#reductions, using Lazy execution. It doesn't compute anything until an
-#answer is needed, then all the mapping is done at once. So I can't time
-#the individual portions of the program-- only the total runtime of each
-#word count.
-#See: https://stackoverflow.com/questions/36269179/how-to-time-a-transformation-in-spark-given-lazy-execution-style
+#I run this script using: python3 project3-stephen-stengel.py
+
 
 from pyspark import SparkContext
 from pyspark import SparkConf
@@ -22,23 +18,18 @@ from operator import itemgetter #for sorting by an unnamed key
 import time #for timing the reductions.
 import os #removing created files
 import math #for math.inf
+import matplotlib.pyplot as plt #for plotting
 
 
 GLOBAL_NUM_PRINT_LINES = 10
 
 
 def main(args):
-	#this can limit the number of threads to use...
-	# ~ conf = SparkConf()
-	# ~ conf.setMaster("local[3]")
-	# ~ sc = SparkContext(conf=conf)
-	
 	sc = SparkContext()
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 	print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
-	
 	
 	file1 = "WarIsARacket_djvu.txt"
 	file2 = "pride-and-prejudice.txt"
@@ -58,22 +49,26 @@ def main(args):
 	isPrintLists = True
 	isPrintTimes = True
 	
-	# ~ print("Starting timing tests...")
-	# ~ for i in range(0, len(fNameArray) ):
-		# ~ runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
-	# ~ print("Time tests done!")
+	print("Starting timing tests...")
+	for i in range(0, len(fNameArray) ):
+		runTest( fNameArray[i], sc, isPrintLists, isPrintTimes )
+	print("Time tests done!")
 	
 	
-	print("Starting cores tests...")
-	
-	print("Done!")
-	for i in range(1, 8):
+	print("Starting thread tests...")
+	threadMins = []
+	for i in range(1, 9):
 		sc.stop()
 		conf = SparkConf()
 		conf.setMaster("local[" + str(i) + "]")
 		sc = SparkContext(conf=conf)
 		print("Testing with " + str(i) + " thread...")
-		runTest( file5, sc, isPrintLists, isPrintTimes )
+		thisMin = runTest( file5, sc, isPrintLists, isPrintTimes )#####
+		threadMins.append( thisMin )
+	print("Saving thread graph...")
+	printThreadGraph( range(1, len(threadMins) + 1), threadMins)
+	print("Done!")
+	
 	print("Removing temporary files...")
 	os.system("rm " + str(file3) + " " + str(file4) + " " + str(file5) )
 	print("Done!")
@@ -176,6 +171,20 @@ def fileMultiplier(inFileName, mult):
 				outfile.write(line)
 
 	return outFileName
+
+
+# ~ def printThreadGraph(xArray, yArray, xlow, xhigh, ylow, yhigh):
+def printThreadGraph(xArray, yArray):
+	plt.title("Runtime of map/reduce on pride-and-prejudice-1000.txt")
+	plt.xlabel("Number of Threads")
+	plt.ylabel("Time in seconds")
+	plt.scatter(xArray, yArray, color="Red")
+	# ~ plt.xlim(xlow, xhigh)
+	# ~ plt.ylim(ylow, yhigh)
+	
+	plt.savefig("thread-plot.png")
+	
+	plt.clf()
 
 
 if __name__ == '__main__':
